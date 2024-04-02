@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index Prices</title>
+    <!-- Load Plotly.js from CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to Index Price Page</h1>
+    <p>This page is serving index price data.</p>
+
+    <div>
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date">
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date">
+        <button id="update-button">Update</button>
+    </div>
+
+    <h2>Index Closing Prices Chart (Last 30 Days)</h2>
+    <div id="price-chart"></div>
+    
+    <h2>Index Price History (Last 30 Days)</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>S&P 500 Close</th>
+                <th>S&P 500 Volume</th>
+                <th>Dow Jones Close</th>
+                <th>Dow Jones Volume</th>
+                <th>NASDAQ Close</th>
+                <th>NASDAQ Volume</th>
+            </tr>
+        </thead>
+        <tbody id="price-table-body">
+            <!-- Prices will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        let buttonClicked = false;
+    
+        // Initialize local storage variables
+        if (!localStorage.getItem('start_date')) {
+            const defaultStartDate = '2024-01-01';
+            localStorage.setItem('start_date', defaultStartDate);
+        }
+    
+        if (!localStorage.getItem('end_date')) {
+            const defaultEndDate = '2024-01-31';
+            localStorage.setItem('end_date', defaultEndDate);
+        }
+    
+        document.getElementById('update-button').addEventListener('click', function() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            updateData(startDate, endDate);
+            saveDates(startDate, endDate); // Save dates when the button is clicked
+            buttonClicked = true;
+        });
+    
+        function getSavedDates() {
+            const startDate = localStorage.getItem('start_date');
+            const endDate = localStorage.getItem('end_date');
+            return { startDate, endDate };
+        }
+    
+        function saveDates(startDate, endDate) {
+            localStorage.setItem('start_date', startDate);
+            localStorage.setItem('end_date', endDate);
+        }
+    
+        function updateDataWithSavedDates() {
+            const { startDate, endDate } = getSavedDates();
+            updateData(startDate, endDate);
+        }
+    
+        function updateData(startDate, endDate) {
+            Promise.all([
+                fetch(`/get_sp500_data?start_date=${startDate}&end_date=${endDate}`).then(response => response.json()),
+                fetch(`/get_dowjones_data?start_date=${startDate}&end_date=${endDate}`).then(response => response.json()),
+                fetch(`/get_nasdaq_data?start_date=${startDate}&end_date=${endDate}`).then(response => response.json())
+            ]).then(([sp500Data, dowjonesData, nasdaqData]) => {
+                updateTable(sp500Data, 'S&P 500');
+                updateTable(dowjonesData, 'Dow Jones');
+                updateTable(nasdaqData, 'NASDAQ');
+                updateChart(sp500Data, dowjonesData, nasdaqData);
+            });
+        }
+    
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US');
+        }
+    
+        function updateTable(data, indexName) {
+            const tableBody = document.getElementById('price-table-body');
+            tableBody.innerHTML = ''; // Clear previous data
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDate(row.Date)}</td>
+                    <td>${row.Close}</td>
+                    <td>${row.Volume}</td>
+                    <td>${row['Close']}</td> <!-- Dow Jones Close -->
+                    <td>${row['Volume']}</td> <!-- Dow Jones Volume -->
+                    <td>${row['Close']}</td> <!-- NASDAQ Close -->
+                    <td>${row['Volume']}</td> <!-- NASDAQ Volume -->
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+    
+        function updateChart(sp500Data, dowjonesData, nasdaqData) {
+            const sp500Dates = sp500Data.map(row => formatDate(row.Date));
+            const sp500Prices = normalizeData(sp500Data.map(row => row.Close));
+            const dowjonesPrices = normalizeData(dowjonesData.map(row => row.Close));
+            const nasdaqPrices = normalizeData(nasdaqData.map(row => row.Close));
+    
+            const chartData = [{
+                x: sp500Dates,
+                y: sp500Prices,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: {color: 'blue'},
+                name: 'S&P 500 Closing Prices'
+            },
+            {
+                x: sp500Dates,
+                y: dowjonesPrices,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: {color: 'red'},
+                name: 'Dow Jones Closing Prices'
+            },
+            {
+                x: sp500Dates,
+                y: nasdaqPrices,
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: {color: 'green'},
+                name: 'NASDAQ Closing Prices'
+            }];
+    
+            const layout = {
+                title: 'Index Closing Prices',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'Normalized Price'
+                }
+            };
+    
+            Plotly.newPlot('price-chart', chartData, layout);
+        }
+    
+        function normalizeData(data) {
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            return data.map(value => (value - min) / (max - min));
+        }
+    
+        // Initial update with saved dates only if the button has been clicked
+        if (buttonClicked) {
+            updateDataWithSavedDates();
+        } else {
+            const defaultStartDate = '2024-01-01';
+            const defaultEndDate = '2024-01-31';
+            updateData(defaultStartDate, defaultEndDate);
+        }
+    </script>
+    
+</body>
+</html>
