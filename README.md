@@ -1,8 +1,8 @@
 # ETF and Stock Selection Algorithm
 
 ## Important Files (methodology explained below)
-- ETFSCREENER_SLOPE.ipynb = This notebook contains ETF selection criteria.
-- GridSearch.ipynb = This notebook contains the methodology for stock fundamental data analysis using weighted growth of indicators
+- ETFSCREENER_SLOPE.ipynb = This notebook contains ETF selection criteria using moving averages, past performance, etc.
+- GridSearch.ipynb = This notebook contains the basis for stock fundamental data analysis using weighted growth of indicators
 - FINALCOMBINEDFUNDAMENTALETFS.ipynb = This notebook combines all previous methdology to dynamically select etfs and prime stock candidates from these.
 
 
