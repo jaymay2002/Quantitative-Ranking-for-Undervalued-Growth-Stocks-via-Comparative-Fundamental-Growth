@@ -25,7 +25,7 @@ This project implements an algorithmic strategy for selecting optimal ETFs and s
 
 ### 3. Backtesting and Optimization
 - **Backtesting** is performed to find the optimal parameters for selecting ETFs and stocks.
-- The backtesting framework is used to determine which selection criteria (e.g., moving averages, earnings growth) provide the best results.
+- The backtesting framework is used to determine which selection criteria (e.g., moving averages, earnings growth, etc.) provide the best results.
 - The model **adjusts weightings** of various indicators to improve decision-making and portfolio performance.
 
 ## Key Features
