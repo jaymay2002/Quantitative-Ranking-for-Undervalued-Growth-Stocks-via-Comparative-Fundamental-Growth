@@ -5,7 +5,7 @@ This project implements an algorithmic strategy for selecting optimal ETFs and s
 ## Project Overview
 
 ### 1. ETF Screening and Selection
-- The algorithm scans **2,000 of the largest ETFs** daily.
+- The project scans **2,000 of the largest ETFs** daily.
 - ETFs are selected based on **technical criteria**, including:
   - **Moving averages** (e.g., 50-day and 200-day MA crossovers)
   - **Recent and historical performance**
