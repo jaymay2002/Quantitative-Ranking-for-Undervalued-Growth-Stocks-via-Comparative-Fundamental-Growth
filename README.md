@@ -40,7 +40,6 @@ This project implements an algorithmic strategy for selecting optimal ETFs and s
 2. **ETF Screener**: Apply technical criteria like moving averages and performance metrics to rank ETFs.
 3. **Stock Screener**: Perform growth-based fundamental analysis and narrow down stock selections based on ETF strength.
 4. **Backtesting**: Test various selection parameters to find the best-performing strategy.
-5. **Optimization**: Adjust indicator weightings to maximize portfolio returns and minimize risk.
 
 ## Future Enhancements
 
